@@ -1,5 +1,6 @@
 defmodule Tamboon do
   import Payment.Opn
+  import Csv.Reader
 
   @moduledoc """
   Documentation for `Tamboon`.
@@ -14,15 +15,6 @@ defmodule Tamboon do
       :world
 
   """
-  def csv do
-    "../../donation.csv"
-    |> Path.expand(__DIR__)
-    |> File.stream!()
-    |> CSV.decode()
-    |> Enum.to_list()
-    |> tl()
-  end
-
   def run_charges_concurrently do
     tasks =
       csv() |> Enum.map(fn {:ok, [_, _, amount]} -> Task.async(fn -> charge(amount) end) end)
