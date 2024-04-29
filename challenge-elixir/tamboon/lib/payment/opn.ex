@@ -23,9 +23,10 @@ defmodule Payment.Opn do
       {:ok, token} ->
         charge_params = [amount: amount, currency: "thb", card: token.id]
 
-        with {:ok, %Omise.Charge{paid: true}} <- Omise.Charge.create(charge_params) do
+        with {:ok, charge} <- Omise.Charge.create(charge_params) do
           # handle success
           IO.puts("Thank you :)")
+          charge
         else
           {:error, code: "too_many_requests"} ->
             IO.puts("Too many requests")
