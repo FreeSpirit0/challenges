@@ -21,7 +21,6 @@ defmodule Tamboon do
     |> CSV.decode()
     |> Enum.to_list()
     |> tl()
-    |> Enum.take(6)
   end
 
   def run_charges_concurrently do

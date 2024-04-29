@@ -12,30 +12,24 @@ defmodule Payment.Opn do
            ]
          ) do
       {:ok, token} -> {:ok, token}
-      {:error, %Omise.Error{code: "too_many_requests"}} -> {:error, :too_many_requests}
-      # Handle other errors
+      {:error, %Omise.Error{code: "too_many_requests"}} ->
+        :timer.sleep(200)
+        token(name, credit_card)
       {:error, error} -> {:error, error}
     end
   end
 
   def charge(amount) do
-    case token("Anthony", "4242424242424242") do
-      {:ok, token} ->
-        charge_params = [amount: amount, currency: "thb", card: token.id]
-
-        with {:ok, charge} <- Omise.Charge.create(charge_params) do
-          # handle success
-          IO.puts("Thank you :)")
-          charge
-        else
-          {:error, code: "too_many_requests"} ->
-            IO.puts("Too many requests")
-            :error
-        end
-
-      {:error, reason} ->
-        IO.puts(reason)
-        :error
+    with {:ok, token} <- token("Anthony", "4242424242424242"),
+         {:ok, charge} <- Omise.Charge.create(amount: amount, currency: "thb", card: token.id) do
+      IO.puts("Thank you :)")
+      charge
+    else
+      {:error, %Omise.Error{code: "too many requests"}} ->
+        :timer.sleep(200)
+        charge(amount)
+      {:error, %Omise.Error{code: code, message: message}} ->
+        IO.puts("#{code} #{message}")
     end
   end
 end
