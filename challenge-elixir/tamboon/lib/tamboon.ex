@@ -7,6 +7,10 @@ defmodule Tamboon do
   Documentation for `Tamboon`.
   """
 
+  def main(args \\ []) do
+    tamboon_from_csv()
+  end
+
   @doc """
   Load donation.csv and process the charges then generate summary.
   """
@@ -15,10 +19,11 @@ defmodule Tamboon do
     tasks =
       csv()
       |> Enum.map(fn {:ok, [name, card, amount]} ->
+        IO.puts("Charging #{name} #{amount} with card #{card}")
         Task.async(fn -> charge(amount, name, card) end)
       end)
 
-    tasks_with_results = Task.yield_many(tasks, 5000)
+    tasks_with_results = Task.yield_many(tasks, 20000)
 
     results =
       Enum.map(tasks_with_results, fn {task, res} ->

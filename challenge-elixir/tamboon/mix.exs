@@ -7,7 +7,8 @@ defmodule Tamboon.MixProject do
       version: "0.1.0",
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      escript: escript()
     ]
   end
 
@@ -27,5 +28,9 @@ defmodule Tamboon.MixProject do
       {:omise, "~> 0.10.0"},
       {:mock, "~> 0.3.0", only: :test}
     ]
+  end
+
+  defp escript do
+    [main_module: Tamboon]
   end
 end

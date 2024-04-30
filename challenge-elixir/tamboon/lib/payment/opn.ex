@@ -35,7 +35,8 @@ defmodule Payment.Opn do
       {:ok, %Omise.Charge{}}
 
   """
-  @spec create_charge(String.t(), String.t()) :: {:error, Omise.Error.t()} | {:ok, Omise.Charge.t()}
+  @spec create_charge(String.t(), String.t()) ::
+          {:error, Omise.Error.t()} | {:ok, Omise.Charge.t()}
   def create_charge(amount, token) do
     Omise.Charge.create(amount: amount, currency: "thb", card: token)
   end
@@ -48,7 +49,8 @@ defmodule Payment.Opn do
       {"Labubu", %Omise.Charge{}}
 
   """
-  @spec charge(String.t(), String.t(), String.t()) :: {:error, :retry_limit_exceeded | Omise.Error.t()} | {String.t(), Omise.Charge.t()}
+  @spec charge(String.t(), String.t(), String.t()) ::
+          {:error, :retry_limit_exceeded | Omise.Error.t()} | {String.t(), Omise.Charge.t()}
   def charge(amount, name, credit_card) do
     with {:ok, token} <- handle_retry(&create_token/2, [name, credit_card]),
          {:ok, charge} <- handle_retry(&create_charge/2, [amount, token.id]) do
@@ -56,12 +58,15 @@ defmodule Payment.Opn do
       {name, charge}
     else
       {:error, :retry_limit_exceeded} ->
-        IO.puts(:retry_limit_exceeded)
         {:error, :retry_limit_exceeded}
 
       {:error, %Omise.Error{code: code, message: message}} ->
         IO.puts("#{code} #{message} User: #{name}")
         {:error, %Omise.Error{code: code, message: message}}
+
+      {:error, error} ->
+        IO.puts(error)
+        {:error, error}
     end
   end
 

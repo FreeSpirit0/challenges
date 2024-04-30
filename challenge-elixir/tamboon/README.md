@@ -1,21 +1,38 @@
 # Tamboon
 
-**TODO: Add description**
+## Prerequisites
 
-## Installation
+- Elixir (version 1.16+)
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `tamboon` to your list of dependencies in `mix.exs`:
+## Running the executable
 
-```elixir
-def deps do
-  [
-    {:tamboon, "~> 0.1.0"}
-  ]
-end
+Run the file in command file
+```
+./tamboon
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/tamboon>.
+## Setup Project
+
+Install dependencies
+
+```
+mix deps.get
+```
+Running the program in iex
+
+```
+iex -S mix
+iex>Tamboon.main
+Total Donation: 3097.0
+Average Donation: 619.4
+Successful Charge: 5
+Failed Charge: 24
+Top 5 Donations:
+Aubree: 871.0 THB
+Farlee	: 819.0 THB
+Monkey D. Luffy: 566.0 THB
+Toddy: 432.0 THB
+Jeannine: 409.0 THB
+```
+
 
