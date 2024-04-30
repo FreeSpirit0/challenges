@@ -17,7 +17,7 @@ defmodule Tamboon do
   """
   def run_charges_concurrently do
     tasks =
-      csv() |> Enum.map(fn {:ok, [_, _, amount]} -> Task.async(fn -> charge(amount) end) end)
+      csv() |> Enum.map(fn {:ok, [name, card, amount]} -> Task.async(fn -> charge(amount, name, card) end) end)
 
     tasks_with_results = Task.yield_many(tasks, :infinity)
 
