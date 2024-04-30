@@ -2,8 +2,8 @@ defmodule Payment.Opn do
   @moduledoc """
   Provide interface to call Omise Charge API.
   """
-  @retry_limit 10
-  @retry_wait_time 500
+  @retry_limit 8
+  @retry_wait_time 200
 
   @doc """
   Create token

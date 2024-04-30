@@ -45,8 +45,10 @@ defmodule OpnTest do
         _ ->
           {:error, %Omise.Error{code: "too_many_requests"}}
       end do
+
       res = charge("20000", "Labubu", "4111111111111111")
 
+      Mock.assert_called Omise.Token.create(:_)
       assert res == {:error, :retry_limit_exceeded}
     end
   end

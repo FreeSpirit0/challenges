@@ -35,4 +35,9 @@ Toddy: 432.0 THB
 Jeannine: 409.0 THB
 ```
 
+## Running test
+```
+mix test
+```
+
 
