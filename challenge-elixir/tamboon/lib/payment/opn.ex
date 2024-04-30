@@ -1,5 +1,6 @@
 defmodule Payment.Opn do
   @retry_limit 5
+  @spec create_token(String.t(), String.t()) :: {:error, Omise.Error.t()} | {:ok, Omise.Token.t()}
   def create_token(name, credit_card) do
     Omise.Token.create(
       card: [
@@ -14,15 +15,17 @@ defmodule Payment.Opn do
     )
   end
 
+  @spec create_charge(String.t(), String.t()) :: {:error, Omise.Error.t()} | {:ok, Omise.Charge.t()}
   def create_charge(amount, token) do
     Omise.Charge.create(amount: amount, currency: "thb", card: token)
   end
 
+  @spec charge(String.t(), String.t(), String.t()) :: {:error, :retry_limit_exceeded | Omise.Error.t()} | Omise.Charge.t()
   def charge(amount, name, credit_card) do
     with {:ok, token} <- handle_retry(&create_token/2, [name, credit_card]),
          {:ok, charge} <- handle_retry(&create_charge/2, [amount, token.id]) do
       IO.puts("Thank you #{name} :)")
-      charge
+      {name, charge}
     else
       {:error, :retry_limit_exceeded} ->
         IO.puts(:retry_limit_exceeded)
@@ -34,6 +37,7 @@ defmodule Payment.Opn do
     end
   end
 
+  @spec handle_retry(fun(), list(), non_neg_integer()) :: {:ok, any()} | {:error, any()}
   defp handle_retry(fun, args, retry_count \\ 0)
 
   defp handle_retry(fun, args, retry_count) when retry_count <= @retry_limit do

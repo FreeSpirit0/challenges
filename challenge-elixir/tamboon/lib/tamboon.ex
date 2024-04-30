@@ -1,6 +1,7 @@
 defmodule Tamboon do
   import Payment.Opn
   import Csv.Reader
+  import Summary.Insight
 
   @moduledoc """
   Documentation for `Tamboon`.
@@ -17,7 +18,10 @@ defmodule Tamboon do
   """
   def run_charges_concurrently do
     tasks =
-      csv() |> Enum.map(fn {:ok, [name, card, amount]} -> Task.async(fn -> charge(amount, name, card) end) end)
+      csv()
+      |> Enum.map(fn {:ok, [name, card, amount]} ->
+        Task.async(fn -> charge(amount, name, card) end)
+      end)
 
     tasks_with_results = Task.yield_many(tasks, :infinity)
 
@@ -28,24 +32,25 @@ defmodule Tamboon do
 
     {successful, failed} =
       Enum.split_with(results, fn
-        {:ok, _ = %Omise.Charge{}} -> true
+        {:ok, _ = {_, %Omise.Charge{}}} -> true
         {:ok, :error} -> false
         _ -> false
       end)
 
-    total =
-      successful
-      |> Enum.map(&elem(&1, 1))
-      |> Enum.map(fn charge -> charge.amount end)
-      |> Enum.sum()
+    total = successful |> total()
 
-    average =
-      total / length(successful)
+    average = successful |> average()
+
+    top =
+      successful
+      |> top()
 
     IO.puts("Total Donation: #{total}")
     IO.puts("Average Donation: #{average}")
     IO.puts("Successful Charge: #{length(successful)}")
     IO.puts("Failed Charge: #{length(failed)}")
+    IO.puts("Top 5 Donations:")
+    IO.puts(top |> Enum.map(fn [name: name, amount: amount] -> "#{name}: #{amount} THB \n" end))
   end
 
   def test do
