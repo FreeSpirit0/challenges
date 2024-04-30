@@ -2,7 +2,8 @@ defmodule Payment.Opn do
   @moduledoc """
   Provide interface to call Omise Charge API.
   """
-  @retry_limit 5
+  @retry_limit 10
+  @retry_wait_time 500
 
   @doc """
   Create token
@@ -88,7 +89,7 @@ defmodule Payment.Opn do
         {:ok, result}
 
       {:error, %Omise.Error{code: "too_many_requests"}} ->
-        :timer.sleep(500)
+        :timer.sleep(@retry_wait_time * retry_count)
         handle_retry(fun, args, retry_count + 1)
 
       {:error, error} ->
