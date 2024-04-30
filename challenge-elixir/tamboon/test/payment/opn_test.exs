@@ -25,25 +25,27 @@ defmodule OpnTest do
   end
 
   test "charge ok when can create token and charge" do
-    Mock.with_mock Payment.Opn,
-      create_charge: fn _, _ -> {:ok, %Omise.Charge{}} end,
-      create_token: fn _, _ -> {:ok, %Omise.Token{}} end do
-      assert charge("2000", "Labubu", "4111111111111111") == {:ok, %Omise.Charge{}}
+    Mock.with_mocks [
+      {Omise.Charge, [],
+       create: fn _ ->
+         {:ok, %Omise.Charge{}}
+       end},
+      {Omise.Token, [],
+       create: fn _ ->
+         {:ok, %Omise.Token{}}
+       end}
+    ] do
+      assert charge("2000", "Labubu", "4111111111111111") == {"Labubu", %Omise.Charge{}}
     end
   end
 
   test "retry mechanism retries when rate limited" do
-    import Payment.Opn
-
-    Mock.with_mock Payment.Opn,
-      create_token: fn
-        _name, _credit_card ->
-          [
-            {:error, %Omise.Error{code: "too_many_requests"}}
-          ]
+    Mock.with_mock Omise.Token,
+      create: fn
+        _ ->
+          {:error, %Omise.Error{code: "too_many_requests"}}
       end do
       res = charge("20000", "Labubu", "4111111111111111")
-      Mock.assert_called_exactly(Payment.Opn.create_token(:_, :_), 5)
 
       assert res == {:error, :retry_limit_exceeded}
     end

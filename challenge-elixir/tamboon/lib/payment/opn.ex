@@ -57,7 +57,12 @@ defmodule Payment.Opn do
       IO.puts("Thank you #{name} :)")
       {name, charge}
     else
+      {:ok, %Omise.Charge{failure_code: failure_code}} ->
+        IO.puts(failure_code)
+        {:error, %Omise.Charge{failure_code: failure_code}}
+
       {:error, :retry_limit_exceeded} ->
+        IO.puts("Retry exceeded")
         {:error, :retry_limit_exceeded}
 
       {:error, %Omise.Error{code: code, message: message}} ->
@@ -73,13 +78,17 @@ defmodule Payment.Opn do
   @spec handle_retry(fun(), list(), non_neg_integer()) :: {:ok, any()} | {:error, any()}
   defp handle_retry(fun, args, retry_count \\ 0)
 
-  defp handle_retry(fun, args, retry_count) when retry_count <= @retry_limit do
+  defp handle_retry(_, _, retry_count) when retry_count == @retry_limit do
+    {:error, :retry_limit_exceeded}
+  end
+
+  defp handle_retry(fun, args, retry_count) do
     case apply(fun, args) do
       {:ok, result} ->
         {:ok, result}
 
       {:error, %Omise.Error{code: "too_many_requests"}} ->
-        :timer.sleep(1000)
+        :timer.sleep(500)
         handle_retry(fun, args, retry_count + 1)
 
       {:error, error} ->
@@ -87,5 +96,5 @@ defmodule Payment.Opn do
     end
   end
 
-  defp handle_retry(_, _, _), do: {:error, :retry_limit_exceeded}
+
 end

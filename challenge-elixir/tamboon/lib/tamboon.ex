@@ -19,7 +19,6 @@ defmodule Tamboon do
     tasks =
       csv()
       |> Enum.map(fn {:ok, [name, card, amount]} ->
-        IO.puts("Charging #{name} #{amount} with card #{card}")
         Task.async(fn -> charge(amount, name, card) end)
       end)
 
