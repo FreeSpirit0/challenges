@@ -2,7 +2,7 @@ defmodule TamboonTest do
   use ExUnit.Case
   doctest Tamboon
 
-  test "greets the world" do
-    assert Tamboon.hello() == :world
+  test "Very cool function" do
+    assert Tamboon.test() == 2
   end
 end

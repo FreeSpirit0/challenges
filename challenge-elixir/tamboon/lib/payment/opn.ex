@@ -1,5 +1,17 @@
 defmodule Payment.Opn do
+  @moduledoc """
+  Provide interface to call Omise Charge API.
+  """
   @retry_limit 5
+
+  @doc """
+  Create token
+
+  ## Examples
+      iex> Payment.Opn.create_token("dog", "4111111111111111")
+      {:ok, %Omise.Token{}}
+
+  """
   @spec create_token(String.t(), String.t()) :: {:error, Omise.Error.t()} | {:ok, Omise.Token.t()}
   def create_token(name, credit_card) do
     Omise.Token.create(
@@ -15,12 +27,28 @@ defmodule Payment.Opn do
     )
   end
 
+  @doc """
+  Create charge using token.
+
+  ## Examples
+      iex> Payment.Opn.create_charge("20000", "tokn_test_5zlei799wdoe6egskrf")
+      {:ok, %Omise.Charge{}}
+
+  """
   @spec create_charge(String.t(), String.t()) :: {:error, Omise.Error.t()} | {:ok, Omise.Charge.t()}
   def create_charge(amount, token) do
     Omise.Charge.create(amount: amount, currency: "thb", card: token)
   end
 
-  @spec charge(String.t(), String.t(), String.t()) :: {:error, :retry_limit_exceeded | Omise.Error.t()} | Omise.Charge.t()
+  @doc """
+  Create token and charge customer using token.
+
+  ## Examples
+      iex> Payment.Opn.charge("20000", "Labubu", "4111111111111111")
+      {"Labubu", %Omise.Charge{}}
+
+  """
+  @spec charge(String.t(), String.t(), String.t()) :: {:error, :retry_limit_exceeded | Omise.Error.t()} | {String.t(), Omise.Charge.t()}
   def charge(amount, name, credit_card) do
     with {:ok, token} <- handle_retry(&create_token/2, [name, credit_card]),
          {:ok, charge} <- handle_retry(&create_charge/2, [amount, token.id]) do

@@ -1,4 +1,11 @@
 defmodule Csv.Reader do
+  @moduledoc """
+  CSV Reader.
+  """
+
+  @doc """
+  Load donation.csv and get rid of header row.
+  """
   @spec csv() :: [[String.t()]]
   def csv do
     "../donation.csv"

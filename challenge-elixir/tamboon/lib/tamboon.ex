@@ -1,29 +1,24 @@
 defmodule Tamboon do
   import Payment.Opn
   import Csv.Reader
-  import Summary.Insight
+  import Summary.Report
 
   @moduledoc """
   Documentation for `Tamboon`.
   """
 
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Tamboon.hello()
-      :world
-
+  Load donation.csv and process the charges then generate summary.
   """
-  def run_charges_concurrently do
+  @spec tamboon_from_csv() :: :ok
+  def tamboon_from_csv do
     tasks =
       csv()
       |> Enum.map(fn {:ok, [name, card, amount]} ->
         Task.async(fn -> charge(amount, name, card) end)
       end)
 
-    tasks_with_results = Task.yield_many(tasks, :infinity)
+    tasks_with_results = Task.yield_many(tasks, 5000)
 
     results =
       Enum.map(tasks_with_results, fn {task, res} ->
@@ -37,20 +32,7 @@ defmodule Tamboon do
         _ -> false
       end)
 
-    total = successful |> total()
-
-    average = successful |> average()
-
-    top =
-      successful
-      |> top()
-
-    IO.puts("Total Donation: #{total}")
-    IO.puts("Average Donation: #{average}")
-    IO.puts("Successful Charge: #{length(successful)}")
-    IO.puts("Failed Charge: #{length(failed)}")
-    IO.puts("Top 5 Donations:")
-    IO.puts(top |> Enum.map(fn [name: name, amount: amount] -> "#{name}: #{amount} THB \n" end))
+    report_full(successful |> Enum.map(fn {:ok, charge} -> charge end), failed)
   end
 
   def test do
