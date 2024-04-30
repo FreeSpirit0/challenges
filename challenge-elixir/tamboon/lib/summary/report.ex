@@ -2,12 +2,12 @@ defmodule Summary.Report do
   import Summary.Insight
   @spec report_total(non_neg_integer()) :: :ok
   def report_total(total) do
-    IO.puts("Total Donation: #{total}")
+    IO.puts("Total Donation: #{total / 100}")
   end
 
   @spec report_average(non_neg_integer()) :: :ok
   def report_average(average) do
-    IO.puts("Average Donation: #{average}")
+    IO.puts("Average Donation: #{average / 100}")
   end
 
   @spec report_successful([Omise.Charge.t()]) :: :ok
@@ -23,7 +23,7 @@ defmodule Summary.Report do
   @spec report_top_5(list(name: String.t(), amount: number())) :: :ok
   def report_top_5(top) do
     IO.puts("Top 5 Donations:")
-    IO.puts(top |> Enum.take(5) |> Enum.map(fn [name: name, amount: amount] -> "#{name}: #{amount} THB \n" end))
+    IO.puts(top |> Enum.take(5) |> Enum.map(fn [name: name, amount: amount] -> "#{name}: #{amount / 100} THB \n" end))
   end
 
   @spec report_full([Omise.Charge.t()], [Omise.Error.t()]) :: :ok
